@@ -7,21 +7,43 @@ from dotenv import load_dotenv
 load_dotenv()
 
 try:
+    ##################### Default page state data #####################
+    default_job_description = ""
+    default_resume_text = ""
+    default_interview_type = "introductory"
+    default_expertise_level ="Entry-level"
+    default_interview_duration = 10
+    default_is_interview_or_prompts = "interview"
+    default_audio_response = ""
+    default_interview_questions = []
+    default_feedback = {
+        'qualitative': "",
+        'quantitative': -1,
+    }
 
-    default_prompt = ""
-    default_question = ""
-    default_answer = ""
+    #################### From the user to the model ####################
+    # Setup questions to ask the user
+    if "job_description" not in st.session_state:
+        st.session_state['job_description'] = default_job_description
+    if "resume_text" not in st.session_state:
+        st.session_state['resume_text'] = default_resume_text
+    if "interview_type" not in st.session_state:
+        st.session_state['interview_type'] = default_interview_type # either "introductory" or "technical"
+    if "expertise_level" not in st.session_state:
+        st.session_state['expertise_level'] = default_expertise_level # "entry-level", "intermediate", or "expert"
+    if "interview_duration" not in st.session_state:
+        st.session_state['interview_duration'] = default_interview_duration
+    if "is_interview_or_prompts" not in st.session_state:
+        st.session_state['is_interview_or_prompts'] = default_is_interview_or_prompts # "interview" | "prompts"
+    # Need Whisper AI to parse
+    if "audio_response" not in st.session_state:
+        st.session_state['audio_response'] = default_audio_response # !TODO: determine how this will work
 
-    if 'question' not in st.session_state:
-        st.session_state['question'] = default_question
-    if 'prompt' not in st.session_state:
-        st.session_state['prompt'] = default_prompt
-    if 'response' not in st.session_state:
-        st.session_state['response'] = {
-            "choices" :[{
-                "text" : default_answer
-            }]
-        }
+    #################### From the model back to the user ####################
+    if "interview_questions" not in st.session_state:
+        st.session_state['interview_questions'] = default_interview_questions # string[]
+    if "feedback" not in st.session_state:
+        st.session_state['feedback'] = default_feedback
 
     st.image(os.path.join('assets','RedisOpenAI.png'))
 
