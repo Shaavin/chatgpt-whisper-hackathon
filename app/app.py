@@ -2,6 +2,7 @@
 import os
 import streamlit as st
 from st_custom_components import st_audiorec
+import openai
 
 from urllib.error import URLError
 from qna import answer_question_with_context
@@ -56,7 +57,14 @@ try:
     st.title('Interview Prep with Worktern')
 
     wav_audio_data = st_audiorec() # !NOTE: audio information stored in this variable
-    st.write(wav_audio_data[:100])
+    openai.api_key = os.environ['OPENAI_API_KEY']
+    try:
+        audio_file = open('./test.wav', 'rb')
+        transcript = openai.Audio.transcribe('whisper-1', audio_file)
+        st.write(transcript)
+    except FileNotFoundError:
+        pass
+
     # st.image(os.path.join('assets','RedisOpenAI.png'))
 
     # col1, col2 = st.columns([4,2])
