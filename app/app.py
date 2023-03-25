@@ -1,5 +1,7 @@
+# For recording audio
 import os
 import streamlit as st
+from st_custom_components import st_audiorec
 
 from urllib.error import URLError
 from qna import answer_question_with_context
@@ -7,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 try:
-    ##################### Default page state data #####################
+    ######################## Default page state data ########################
     default_job_description = ""
     default_resume_text = ""
     default_interview_type = "introductory"
@@ -21,7 +23,7 @@ try:
         'quantitative': -1,
     }
 
-    #################### From the user to the model ####################
+    ###################### From the user to the model ######################
     # Setup questions to ask the user
     if "job_description" not in st.session_state:
         st.session_state['job_description'] = default_job_description
@@ -45,7 +47,16 @@ try:
     if "feedback" not in st.session_state:
         st.session_state['feedback'] = default_feedback
 
-    st.write('Hello World')
+    ########################### Set page meta-data ###########################
+    st.set_page_config(
+        page_title="Worktern Interview Prep"
+    )
+
+    ############################## Page display ##############################
+    st.title('Interview Prep with Worktern')
+
+    wav_audio_data = st_audiorec() # !NOTE: audio information stored in this variable
+    st.write(wav_audio_data[:100])
     # st.image(os.path.join('assets','RedisOpenAI.png'))
 
     # col1, col2 = st.columns([4,2])
