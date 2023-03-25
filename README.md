@@ -16,7 +16,7 @@ OPENAI_COMPLETIONS_ENGINE=text-davinci-003
 OPENAI_EMBEDDINGS_ENGINE=text-embedding-ada-002
 REDIS_HOST=redis
 REDIS_PORT=6379
-TOKENIZERS_PARALLELISM=false" > temp.txt
+TOKENIZERS_PARALLELISM=false" > .env
 ```
 
 _Fill out values, most importantly, your `OPENAI_API_KEY`._
