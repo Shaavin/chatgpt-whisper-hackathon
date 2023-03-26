@@ -36,3 +36,6 @@ http://localhost:8080/
 ```
 
 The **first time you run the app** -- all documents will be downloaded, processed, and stored in Redis. This will take a few minutes to spin up initially. From that point forward, the app should be quicker to load.
+
+*Download and add the following .bin file to your repository (too large to share on GitHub):*
+https://drive.google.com/file/d/1wKEWNrY8Wicq3Jb59uiUwOEm5oFON0wJ/view?usp=sharing
