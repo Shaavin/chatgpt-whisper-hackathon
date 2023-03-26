@@ -7,6 +7,7 @@ import sklearn
 import gensim
 from sklearn.neighbors import NearestNeighbors
 import openai
+import re
 
 from redis.commands.search.query import Query
 from redis.commands.search.indexDefinition import (

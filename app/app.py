@@ -9,7 +9,6 @@ openai.api_key = os.environ['OPENAI_API_KEY']
 import time
 import datetime
 import math
-import re
 
 from urllib.error import URLError
 from qna import answer_question_with_context
