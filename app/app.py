@@ -83,14 +83,6 @@ def main():
     Main page thread. This function renders the site.
     """
     MAXIMUM_NUM_INTERVIEW_QUESTIONS = 15 # !NOTE: Edit me to control the maximum number of interview questions allowed
-  
-    # Silently remove "user-audio.wav" if it exists
-    # This file is used for tracking user audio
-    for i in range(MAXIMUM_NUM_INTERVIEW_QUESTIONS):
-        try:
-            os.remove(f'user-answer-{i}.wav')
-        except FileNotFoundError:
-            pass
 
     st.session_state.update(st.session_state)
 
@@ -145,12 +137,24 @@ def main():
             st.session_state.user_feedback = default_user_feedback
 
         ######################################### General state that needs tracked #########################################
+        if 'cleared_audio_files_on_load' not in st.session_state:
+            st.session_state.cleared_audio_files_on_load = False
         if 'question_index' not in st.session_state:
             st.session_state.question_index = default_question_index
         if 'can_progress_setup' not in st.session_state:
             st.session_state.can_progress_setup = default_can_progress_setup
         if 'can_progress_onboarding' not in st.session_state:
             st.session_state.can_progress_onboarding = default_can_progress_onboarding
+
+        if not st.session_state.cleared_audio_files_on_load:
+            st.session_state.cleared_audio_files_on_load = True
+            # Silently remove "user-audio.wav" if it exists
+            # This file is used for tracking user audio
+            for i in range(MAXIMUM_NUM_INTERVIEW_QUESTIONS):
+                try:
+                    os.remove(f'user-answer-{i}.wav')
+                except FileNotFoundError:
+                    pass
 
         ################################################ Set page meta-data ################################################
         st.set_page_config(
@@ -161,7 +165,7 @@ def main():
         with st.container():
             st.markdown("### :blue[Welcome to Worktern's Interview AI]")
             st.text_input('', placeholder='First & Last Name', label_visibility='collapsed', on_change=check_can_progress_setup_state, key='user_name')
-            st.selectbox('', ("I'm a...", 'High School Student', 'College Student', 'Professional'), label_visibility='collapsed', on_change=check_can_progress_setup_state, key='asfd')
+            st.selectbox('', ("I'm a...", 'High School Student', 'College Student', 'Professional'), label_visibility='collapsed', on_change=check_can_progress_setup_state, key=['user_status'])
             st.text_input('', placeholder="Job Title I'm Interviewing For...", label_visibility='collapsed', on_change=check_can_progress_setup_state, key='desired_role')
             st.text_input('', placeholder='Company Name', label_visibility='collapsed', on_change=check_can_progress_setup_state, key='user_company')
             st.button('NEXT PAGE', type='primary', disabled=(not st.session_state.can_progress_setup), use_container_width=True)
@@ -215,7 +219,7 @@ def main():
                 st.markdown('Powered by ChatGPT & Whisper, Interview AI has given you a score based on the average results of all your interview questions! See the breakdown of your feedback & recommendations below...')
                 for i in range(len(st.session_state.num_interview_questions)):
                     if st.session_state.user_answers[i]:
-                        with st.expander(f'Question {i}'):
+                        with st.expander(f'Question {i + 1}'):
                             st.markdown(f'<p style="font-weight: 700; font-size: 18px;">{st.session_state.interview_questions[i]}</p>', unsafe_allow_html=True)
                             st.write(f'<p style="font-size: 14px;">{st.session_state.user_feedback["qualitative"][i]}</p>', unsafe_allow_html=True)
                             audio_file = open(f'user-answer-{i}.wav', 'rb')
