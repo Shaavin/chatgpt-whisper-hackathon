@@ -3,3 +3,4 @@
 .DS_Store
 __pycache__/
 user-audio-*.wav
+qna/word_vectors.bin

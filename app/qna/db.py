@@ -29,7 +29,7 @@ openai.api_key = os.environ['OPENAI_API_KEY']
 
 def get_questions(question_string):
     questions = question_string.strip().split("\n")
-    return [q.strip() for q in questions]
+    return [q.strip() for q in questions if q.strip()]
 
 # Returns array of questions
 
@@ -168,6 +168,7 @@ def get_content_as_string(top_5: pd.DataFrame):
     content_string = '//\n'.join(top_5['content'])
     # Replace the newline characters ("\n") with a new line ("\n") and double slashes ("//")
     content_string = content_string.replace('\n', '\n')
+    content_string = content_string[:3900]
     return (content_string)
 
 
@@ -303,3 +304,25 @@ def init():
         create_index(redis_conn)
         load_documents(redis_conn)
     return redis_conn
+
+def api_get_final_feedback(feedback, job_description):
+ 
+
+
+    prompt = f"Act like you are giving feedback on a job interview, and are helping the person being interviewed improve. Based on all this feedback you gave:  {feedback}\nFor this job: {job_description}\nGive the person being inverviewd an overall score out of 100, then an overall summary on how they did."
+    response = openai.Completion.create(
+            engine="text-davinci-003",
+            prompt=prompt,
+            max_tokens=150,
+            n=1,
+            stop=None,
+            temperature=0.5,
+        )
+
+    final = response.choices[0].text.strip()
+
+    # Extract the score from the final string
+    score_match = re.search(r"\d+", final)
+    score = int(score_match.group(0)) if score_match else None
+    
+    return final, score

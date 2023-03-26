@@ -15,6 +15,8 @@ from qna import answer_question_with_context
 from dotenv import load_dotenv
 load_dotenv()
 
+from qna.db import api_get_question, api_get_feedback, get_most_relevant, get_content_as_string, api_get_final_feedback
+
 #################################################### Helper functions ####################################################
 def parse_seconds_to_hrs_mins_secs(seconds):
     """
@@ -77,6 +79,23 @@ def split_pages():
     make_gap()
     st.markdown('___')
     make_gap()
+
+def derive_interview_questions():
+    relevant = get_most_relevant(True, st.session_state.job_description)
+    content = get_content_as_string(relevant)
+    questions = api_get_question(st.session_state.job_description, st.session_state.user_status, st.session_state.num_interview_questions, content)
+    st.session_state.interview_questions = questions
+
+def derive_interview_feedback():
+    all_feedback = list()
+    for i in range(2):
+        feedback = api_get_feedback(st.session_state.interview_questions[i], st.session_state.user_answers[i], st.session_state.job_description)
+        all_feedback.append(feedback)
+    st.session_state.user_feedback["qualitative"] = all_feedback
+
+    all_feedbacks = ''.join(st.session_state.user_feedback['qualitative'])
+    final, score = api_get_final_feedback(all_feedbacks, st.session_state.job_description)
+    st.session_state.user_feedback['quantitative'] = score
 
 def main():
     """
@@ -168,7 +187,7 @@ def main():
             st.selectbox('', ("I'm a...", 'High School Student', 'College Student', 'Professional'), label_visibility='collapsed', on_change=check_can_progress_setup_state, key=['user_status'])
             st.text_input('', placeholder="Job Title I'm Interviewing For...", label_visibility='collapsed', on_change=check_can_progress_setup_state, key='desired_role')
             st.text_input('', placeholder='Company Name', label_visibility='collapsed', on_change=check_can_progress_setup_state, key='user_company')
-            st.button('NEXT PAGE', type='primary', disabled=(not st.session_state.can_progress_setup), use_container_width=True)
+            st.button('NEXT PAGE', type='primary', use_container_width=True)
 
         split_pages()
 
@@ -181,28 +200,32 @@ def main():
                 st.session_state.user_resume = st.file_uploader('Upload your file:', type=['pdf'], on_change=(check_can_progress_onboarding))
             st.session_state.interview_focus = st.selectbox('', ('Interview Type', 'Standard Interview (mixed)', 'Technical Interview (hard-skills)', 'Cultural Fit Interview (soft-skills)'), label_visibility='collapsed', on_change=(check_can_progress_onboarding))
             st.session_state.num_interview_questions = st.selectbox('', ('5 Questions', '10 Questions', '15 Questions'), label_visibility='collapsed', on_change=(check_can_progress_onboarding))
-            st.button('START', type='primary', disabled=(not st.session_state.can_progress_onboarding), use_container_width=True)
+            st.button('START', type='primary', on_click=(derive_interview_questions), use_container_width=True)
 
         split_pages()
 
         with st.container():
             user_first_name = get_user_first_name() if get_user_first_name() != "" else "there"
             st.markdown(f'<p style="font-size: 18px;">Hi {user_first_name}, nice to meet you! My name is Interview AI, and I will be conducting your interview today.</p>', unsafe_allow_html=True)
-            if st.session_state.interview_questions[st.session_state.question_index]:
-                st.markdown(f'<p style="font-size: 18px;">{st.session_state.interview_questions[st.session_state.question_index]}</p>', unsafe_allow_html=True)
-                st.markdown('___')
-                st.write(f'Question {st.session_state.question_index + 1}')
-                wav_audio_data = st_audiorec() # !NOTE: audio information stored in this variable as a byte array
-                if st.button('Submit Answer', type='primary', disabled=(not wav_audio_data), use_container_width=True):
-                    with open(f'user-answer-{st.session_state.question_index}.wav', 'bw') as file:
-                        file.write(wav_audio_data)
-                try:
-                    audio_file = open(f'./user-answer-{st.session_state.question_index}.wav', 'rb')
-                    transcript = openai.Audio.transcribe('whisper-1', audio_file)
-                    st.session_state.user_answers[st.session_state.question_index] = transcript.text
-                    st.session_state.question_index += 1
-                except FileNotFoundError as e:
-                    pass # Want to  fail silently, rather than noisely
+            try:
+                if st.session_state.interview_questions[st.session_state.question_index]: # !NOTE: Could fail here
+                    st.markdown(f'<p style="font-size: 18px;">{st.session_state.interview_questions[st.session_state.question_index]}</p>', unsafe_allow_html=True)
+                    st.markdown('___')
+                    st.write(f'Question {st.session_state.question_index + 1}')
+                    wav_audio_data = st_audiorec() # !NOTE: audio information stored in this variable as a byte array
+                    if st.button('Submit Answer', type='primary', disabled=(not wav_audio_data), use_container_width=True):
+                        with open(f'user-answer-{st.session_state.question_index}.wav', 'bw') as file:
+                            file.write(wav_audio_data)
+                    try:
+                        audio_file = open(f'./user-answer-{st.session_state.question_index}.wav', 'rb')
+                        transcript = openai.Audio.transcribe('whisper-1', audio_file)
+                        st.session_state.user_answers[st.session_state.question_index] = transcript.text
+                        st.session_state.question_index += 1
+                    except FileNotFoundError as e:
+                        pass # Want to  fail silently, rather than noisely
+                    st.button('Finish Interview', on_click=(derive_interview_feedback), use_container_width=True)
+            except:
+                pass # Fail silently
 
         split_pages()
 
@@ -224,6 +247,8 @@ def main():
                             st.write(f'<p style="font-size: 14px;">{st.session_state.user_feedback["qualitative"][i]}</p>', unsafe_allow_html=True)
                             audio_file = open(f'user-answer-{i}.wav', 'rb')
                             st.audio(audio_file)
+     
+        st.write(st.session_state)
 
     ### TIMER LOGIC -- TODO (be careful with this; in its current state, it will block the main thread) ###
     # start_time = time.time()
