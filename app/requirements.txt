@@ -7,6 +7,4 @@ tenacity
 pandas
 numpy
 gensim
-torch
-tensorflow
-flax
+scikit-learn
