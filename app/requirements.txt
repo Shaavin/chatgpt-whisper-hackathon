@@ -6,3 +6,7 @@ transformers
 tenacity
 pandas
 numpy
+gensim
+torch
+tensorflow
+flax
