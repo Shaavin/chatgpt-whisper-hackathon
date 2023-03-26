@@ -84,11 +84,12 @@ def derive_interview_questions():
     relevant = get_most_relevant(True, st.session_state.job_description)
     content = get_content_as_string(relevant)
     questions = api_get_question(st.session_state.job_description, st.session_state.user_status, st.session_state.num_interview_questions, content)
+    # st.write(questions) # !NOTE
     st.session_state.interview_questions = questions
 
 def derive_interview_feedback():
     all_feedback = list()
-    for i in range(2):
+    for i in range(st.session_state.num_interview_questions):
         feedback = api_get_feedback(st.session_state.interview_questions[i], st.session_state.user_answers[i], st.session_state.job_description)
         all_feedback.append(feedback)
     st.session_state.user_feedback["qualitative"] = all_feedback
@@ -199,7 +200,7 @@ def main():
             with st.expander('Upload Resume'):
                 st.session_state.user_resume = st.file_uploader('Upload your file:', type=['pdf'], on_change=(check_can_progress_onboarding))
             st.session_state.interview_focus = st.selectbox('', ('Interview Type', 'Standard Interview (mixed)', 'Technical Interview (hard-skills)', 'Cultural Fit Interview (soft-skills)'), label_visibility='collapsed', on_change=(check_can_progress_onboarding))
-            st.session_state.num_interview_questions = st.selectbox('', ('5 Questions', '10 Questions', '15 Questions'), label_visibility='collapsed', on_change=(check_can_progress_onboarding))
+            st.session_state.num_interview_questions = int(st.selectbox('', ('5 Questions', '10 Questions', '15 Questions'), label_visibility='collapsed', on_change=(check_can_progress_onboarding)).split()[0])
             st.button('START', type='primary', on_click=(derive_interview_questions), use_container_width=True)
 
         split_pages()
@@ -240,7 +241,7 @@ def main():
                     </p>''', unsafe_allow_html=True)
                 st.markdown(f'<p style="font-weight: 700; text-align: center;">You scored {st.session_state.user_feedback["quantitative"]} out of 100</p>', unsafe_allow_html=True)
                 st.markdown('Powered by ChatGPT & Whisper, Interview AI has given you a score based on the average results of all your interview questions! See the breakdown of your feedback & recommendations below...')
-                for i in range(len(st.session_state.num_interview_questions)):
+                for i in range(st.session_state.num_interview_questions):
                     if st.session_state.user_answers[i]:
                         with st.expander(f'Question {i + 1}'):
                             st.markdown(f'<p style="font-weight: 700; font-size: 18px;">{st.session_state.interview_questions[i]}</p>', unsafe_allow_html=True)
@@ -248,7 +249,7 @@ def main():
                             audio_file = open(f'user-answer-{i}.wav', 'rb')
                             st.audio(audio_file)
      
-        st.write(st.session_state)
+        # st.write(st.session_state) # !NOTE
 
     ### TIMER LOGIC -- TODO (be careful with this; in its current state, it will block the main thread) ###
     # start_time = time.time()

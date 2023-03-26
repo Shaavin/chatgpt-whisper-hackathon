@@ -30,7 +30,11 @@ openai.api_key = os.environ['OPENAI_API_KEY']
 
 def get_questions(question_string):
     questions = question_string.strip().split("\n")
-    return [q.strip() for q in questions if q.strip()]
+    result = []
+    for question in questions:
+        if any(char.isdigit() for char in question):
+            result.append(question.strip())
+    return result
 
 # Returns array of questions
 
