@@ -1,5 +1,7 @@
 # For recording audio
 import os
+from qna.db import get_content_as_string
+from qna.db import get_most_relevant
 import streamlit as st
 from st_custom_components import st_audiorec
 import openai

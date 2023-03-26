@@ -10,6 +10,7 @@ services:
       - .env
     volumes:
       - ./app:/app
+      - ./app/qna:/app/qna
     depends_on:
       redis:
         condition: service_healthy
