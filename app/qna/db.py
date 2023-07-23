@@ -41,12 +41,12 @@ def get_questions(question_string):
 def api_get_question(job_description: str, experience_level: str, number_of_questions: int, content:str):
  
 
-    prompt = f"Look for questions related to {job_description}, that most fit {experience_level} and put them in a list with this format:\nQuestion 1: \nQuestion 2:\nQuestion 3: \nFind the questions from the content below There should be {number_of_questions} questions:\n{content}"
+    prompt = f"Look for questions related to {job_description}, that most fit {experience_level} and put them in a list with this format:\nQuestion 1: \nQuestion 2:\nQuestion 3: \nFind the questions from the content below. There should be {number_of_questions}. Content:\n{content}"
 
     response = openai.Completion.create(
         engine="text-davinci-003",
         prompt=prompt,
-        max_tokens=150,
+        max_tokens=500,
         n=1,
         stop=None,
         temperature=0.7,
