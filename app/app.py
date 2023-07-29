@@ -83,7 +83,8 @@ def split_pages():
 def derive_interview_questions():
     relevant = get_most_relevant(True, st.session_state.job_description)
     content = get_content_as_string(relevant)
-    questions = api_get_question(st.session_state.job_description, st.session_state.user_status, st.session_state.num_interview_questions, content)
+    raw, questions = api_get_question(st.session_state.job_description, st.session_state.user_status, st.session_state.num_interview_questions, content)
+    st.write(raw)
     # st.write(questions) # !NOTE
     st.session_state.interview_questions = questions
 
@@ -200,7 +201,7 @@ def main():
             with st.expander('Upload Resume'):
                 st.session_state.user_resume = st.file_uploader('Upload your file:', type=['pdf'], on_change=(check_can_progress_onboarding))
             st.session_state.interview_focus = st.selectbox('', ('Interview Type', 'Standard Interview (mixed)', 'Technical Interview (hard-skills)', 'Cultural Fit Interview (soft-skills)'), label_visibility='collapsed', on_change=(check_can_progress_onboarding))
-            st.session_state.num_interview_questions = int(st.selectbox('', ('5 Questions', '10 Questions', '15 Questions'), label_visibility='collapsed', on_change=(check_can_progress_onboarding)).split()[0])
+            st.session_state.num_interview_questions = int(st.selectbox('', ('1 Question', '5 Questions', '10 Questions', '15 Questions'), label_visibility='collapsed', on_change=(check_can_progress_onboarding)).split()[0])
             st.button('START', type='primary', on_click=(derive_interview_questions), use_container_width=True)
 
         split_pages()
@@ -217,13 +218,13 @@ def main():
                     if st.button('Submit Answer', type='primary', disabled=(not wav_audio_data), use_container_width=True):
                         with open(f'user-answer-{st.session_state.question_index}.wav', 'bw') as file:
                             file.write(wav_audio_data)
-                    try:
-                        audio_file = open(f'./user-answer-{st.session_state.question_index}.wav', 'rb')
-                        transcript = openai.Audio.transcribe('whisper-1', audio_file)
-                        st.session_state.user_answers[st.session_state.question_index] = transcript.text
-                        st.session_state.question_index += 1
-                    except FileNotFoundError as e:
-                        pass # Want to  fail silently, rather than noisely
+                        try:
+                            audio_file = open(f'./user-answer-{st.session_state.question_index}.wav', 'rb')
+                            transcript = openai.Audio.transcribe('whisper-1', audio_file)
+                            st.session_state.user_answers[st.session_state.question_index] = transcript.text
+                            st.session_state.question_index += 1
+                        except FileNotFoundError as e:
+                            pass # Want to  fail silently, rather than noisely
                     st.button('Finish Interview', on_click=(derive_interview_feedback), use_container_width=True)
             except:
                 pass # Fail silently
@@ -249,7 +250,7 @@ def main():
                             audio_file = open(f'user-answer-{i}.wav', 'rb')
                             st.audio(audio_file)
      
-        # st.write(st.session_state) # !NOTE
+        st.write(st.session_state) # !NOTE
 
     ### TIMER LOGIC -- TODO (be careful with this; in its current state, it will block the main thread) ###
     # start_time = time.time()

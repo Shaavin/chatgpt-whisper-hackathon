@@ -40,28 +40,29 @@ def get_questions(question_string):
 
 def api_get_question(job_description: str, experience_level: str, number_of_questions: int, content:str):
  
-
-    prompt = f"Look for questions related to {job_description}, that most fit {experience_level} and put them in a list with this format:\nQuestion 1: \nQuestion 2:\nQuestion 3: \nFind the questions from the content below There should be {number_of_questions} questions:\n{content}"
+    # prompt = 'tell me about blueberries'
+    prompt = f"Write questions related to this job descripition: '{job_description}', and that most fit {experience_level}. Put them in a list with this format:\nQuestion 1: \nQuestion 2:\nQuestion 3: etc...\nUse questions from the content below to inspire you. Your response should contain only questions. There should be {number_of_questions}. \nContent (pick {number_of_questions} question(s) most relevant to the job description, and as comprehensive as possible given the number of questions):\n{content}"
 
     response = openai.Completion.create(
         engine="text-davinci-003",
         prompt=prompt,
-        max_tokens=150,
+        max_tokens=1000,
         n=1,
         stop=None,
         temperature=0.7,
     )
 
     questions = response.choices[0].text.strip()
+    # print('HERE ARE THE GENERATED INTERVIEW QUESTIONS:', questions)
     
-    return get_questions(questions)
+    return questions, get_questions(questions)
 
 def api_get_feedback(question: str, user_response: str, job_description):
  
 
-    question = 'Question 1: What are the different types of Machine Learning algorithms?'
-    user_response = "knn and neural networks"
-    job_description = 'Machine Learning'
+    # question = 'Question 1: What are the different types of Machine Learning algorithms?'
+    # user_response = "knn and neural networks"
+    # job_description = 'Machine Learning'
 
     prompt = f"Act like you are giving feedback on a job interview, and are helping the person being interviewed improve. Based on this questions:  {question}\nAnd given this response: {user_response}\nFor this job: {job_description}\nGive constructive feedback for the response based on the content below. If you find the user's response to be a good answer the question, let them know and why. Otherwise, tell them how they could do better:\n[RELEVANT CONTENT]"
 
