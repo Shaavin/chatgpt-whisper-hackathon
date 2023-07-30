@@ -10,7 +10,6 @@ from .models import (
     get_completion
 )
 
-redis_conn = db.init()
 PROMPT_HEADER = """Answer the question as truthfully as possible using the provided context, and if the answer is not contained within the text below, say "I don't know."\n\nContext:\n"""
 
 def search_semantic_redis(search_query: str, n: int) -> t.List[dict]:

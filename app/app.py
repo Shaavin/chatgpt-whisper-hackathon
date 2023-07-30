@@ -82,8 +82,12 @@ def split_pages():
 
 def derive_interview_questions():
     relevant = get_most_relevant(True, st.session_state.job_description)
+    st.write(relevant)
     content = get_content_as_string(relevant)
+    st.write("SPLIT HERE")
+    st.write(content)
     raw, questions = api_get_question(st.session_state.job_description, st.session_state.user_status, st.session_state.num_interview_questions, content)
+    st.write("SPLIT HERE")
     st.write(raw)
     # st.write(questions) # !NOTE
     st.session_state.interview_questions = questions
